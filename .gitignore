@@ -3,9 +3,10 @@
 
 # Config files IDE
 .vscode/
+.idea/
 
 # Dataset
-Dataset/
+dataset/
 
 # Mac Files
 *.DS_Store
