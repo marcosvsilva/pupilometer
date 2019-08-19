@@ -1,6 +1,12 @@
 # Exams
 *.mp4
 
+# Config files IDE
+.vscode/
+
+# Dataset
+Dataset/
+
 # Mac Files
 *.DS_Store
 
