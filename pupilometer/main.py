@@ -1,12 +1,28 @@
-import os
-import cv2
 import numpy as np
-
+import cv2
+import os
+from matplotlib import pyplot as plt
 
 class Main:
     def __init__(self):
         self.dataset_path = os.getcwd() + "/dataset"
         self.exams = os.listdir(self.dataset_path)
+
+        # Parameter Definition
+        self.max_height = 50
+        self.max_width = 50
+
+        self.whitening = 0.4
+
+        self.canny_threshold1 = 10
+        self.canny_threshold2 = 50
+
+        self.hough_dp = 40
+        self.hough_minDist = 40
+        self.hough_param1 = 50
+        self.hough_param2 = 60
+        self.hough_minRadius = 30
+        self.hough_maxRadius = 70
 
     def start_process(self):
         for exam in self.exams:
@@ -16,32 +32,35 @@ class Main:
     def pupillary_analysis(self, exam):
         while exam.isOpened():
             ret, frame = exam.read()
-            b, g, r = cv2.split(frame)
 
-            kSize = 4
-            frame_blur = cv2.blur(g, (kSize, kSize))
-            frame_laplacian = cv2.Laplacian(frame_blur, cv2.CV_8UC1)
-            test, frame_black = cv2.threshold(frame_laplacian, 0, 255, cv2.THRESH_BINARY)
+            frame = np.array(frame)
+            cv2.resize(frame, (self.max_height, self.max_width)).flatten()
 
-            pupil = cv2.HoughCircles(frame_laplacian,
-                                     cv2.HOUGH_GRADIENT,
-                                     40, 10,
-                                     param1=50,
-                                     param2=60,
-                                     minRadius=30,
-                                     maxRadius=70)
+            gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+            final = np.copy(gray)
+
+            gray = np.array(255 * (gray / 255) ** self.whitening, dtype='uint8')
+
+            edge = cv2.Canny(gray, threshold1=self.canny_threshold1, threshold2=self.canny_threshold2)
+
+            pupil = cv2.HoughCircles(edge, cv2.HOUGH_GRADIENT, dp=self.hough_dp, minDist=self.hough_minDist,
+                                     param1=self.hough_param1, param2=self.hough_param2,
+                                     minRadius=self.hough_minRadius, maxRadius=self.hough_maxRadius)
 
             if pupil is not None:
                 pupil = np.uint16(np.around(pupil))
 
-                for i in pupil[0,:]:
-                    cv2.circle(frame,(i[0],i[1]),i[2],(0,255,0),2)
-                    cv2.circle(frame,(i[0],i[1]),2,(0,0,255),3)
-                    break
+                for i in pupil[0, :]:
+                    cv2.circle(gray, (i[0], i[1]), i[2], (0, 255, 0), 2)
+                    cv2.circle(gray, (i[0], i[1]), 2, (0, 0, 255), 3)
 
-                cv2.namedWindow('video', cv2.WINDOW_NORMAL)
-                cv2.imshow('video', frame)
-                cv2.waitKey(1)
+            img_final1 = cv2.hconcat([final, edge])
+            cv2.resize(final, img_final1.shape).flatten()
+            img_final = cv2.hconcat([img_final1, gray])
+
+            cv2.namedWindow('Progress', cv2.WINDOW_NORMAL)
+            cv2.imshow('Progress', img_final)
+            cv2.waitKey(1)
 
         exam.release()
         cv2.destroyAllWindows
