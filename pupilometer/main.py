@@ -1,7 +1,6 @@
 import numpy as np
 import cv2
 import os
-from matplotlib import pyplot as plt
 
 class Main:
     def __init__(self):
@@ -9,8 +8,8 @@ class Main:
         self.exams = os.listdir(self.dataset_path)
 
         # Parameter Definition
-        self.max_height = 50
-        self.max_width = 50
+        self.max_height = 10
+        self.max_width = 10
 
         self.whitening = 0.4
 
@@ -21,8 +20,8 @@ class Main:
         self.hough_minDist = 40
         self.hough_param1 = 50
         self.hough_param2 = 60
-        self.hough_minRadius = 30
-        self.hough_maxRadius = 70
+        self.hough_minRadius = 40
+        self.hough_maxRadius = 300
 
     def start_process(self):
         for exam in self.exams:
