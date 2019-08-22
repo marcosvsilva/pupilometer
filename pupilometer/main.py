@@ -3,6 +3,7 @@ import cv2
 import os
 import time
 
+
 class Main:
     def __init__(self):
         self.dataset_path = os.getcwd() + "/dataset"
@@ -12,7 +13,7 @@ class Main:
         self.whitening = 0.2
 
         self.canny_threshold1 = 10
-        self.canny_threshold2 = 50
+        self.canny_threshold2 = 40
 
         self.hough_dp = 30
         self.hough_minDist = 40
@@ -26,13 +27,11 @@ class Main:
         for exam in self.exams:
             video = cv2.VideoCapture("{}/{}".format(self.dataset_path, exam))
             self.pupillary_analysis(video)
+            break
 
     def pupillary_analysis(self, exam):
-        pause = False
-        while pause and exam.isOpened():
+        while exam.isOpened():
             ret, frame = exam.read()
-
-            frame = np.array(frame)
 
             gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
             final = np.copy(gray)
@@ -60,7 +59,7 @@ class Main:
             cv2.imshow('Progress', img_final)
 
             if cv2.waitKey(1) & 0xFF == ord('p'):  # Pause
-                pause = not pause
+                time.sleep(3)
 
         exam.release()
         cv2.destroyAllWindows
