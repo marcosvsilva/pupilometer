@@ -17,11 +17,11 @@ class Main:
 
         self.hough_dp = 30
         self.hough_minDist = 40
-        self.hough_param1 = 10
-        self.hough_param2 = 20
+        self.hough_param1 = 100
+        self.hough_param2 = 100
 
-        self.hough_minRadius = 40
-        self.hough_maxRadius = 50
+        self.hough_minRadius = 10
+        self.hough_maxRadius = 100
 
     def start_process(self):
         for exam in self.exams:
@@ -48,15 +48,14 @@ class Main:
                 pupil = np.uint16(np.around(pupil))
 
                 for i in pupil[0, :]:
-                    cv2.circle(final, (i[0], i[1]), i[2], (0, 255, 0), 2)
-                    cv2.circle(final, (i[0], i[1]), 2, (0, 0, 255), 3)
+                    cv2.circle(final, (i[0], i[1]), i[2], (255, 255, 0), 1)
 
             img_final1 = cv2.hconcat([self.resize(gray), self.resize(whitening)])
             img_final2 = cv2.hconcat([self.resize(edge), self.resize(final)])
             img_final = cv2.vconcat([img_final1, img_final2])
 
-            cv2.namedWindow('Progress', cv2.WINDOW_NORMAL)
-            cv2.imshow('Progress', img_final)
+            cv2.namedWindow('Training', cv2.WINDOW_NORMAL)
+            cv2.imshow('Training', img_final)
 
             if cv2.waitKey(1) & 0xFF == ord('p'):  # Pause
                 time.sleep(3)
