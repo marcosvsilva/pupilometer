@@ -27,7 +27,6 @@ class Main:
         for exam in self.exams:
             video = cv2.VideoCapture("{}/{}".format(self.dataset_path, exam))
             self.pupillary_analysis(video)
-            break
 
     def pupillary_analysis(self, exam):
         while exam.isOpened():
