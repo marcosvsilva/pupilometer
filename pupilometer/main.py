@@ -31,28 +31,32 @@ class Main:
     def pupillary_analysis(self, exam):
         while exam.isOpened():
             ret, frame = exam.read()
+            rows, cols, _ = frame.shape
 
             gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
-            whitening = np.array(255 * (gray / 255) ** self.whitening, dtype='uint8')
-            gaussian = cv2.GaussianBlur(whitening, (9, 9), 0)
+            #whitening = np.array(255 * (gray / 255) ** self.whitening, dtype='uint8')
+            gaussian = cv2.GaussianBlur(gray, (9, 9), 0)
             median = cv2.medianBlur(gaussian, 3)
             threshold = cv2.threshold(median, 25, 255, cv2.THRESH_BINARY_INV)[1]
-            edge = cv2.Canny(threshold, threshold1=self.canny_threshold1, threshold2=self.canny_threshold2)
+            #edge = cv2.Canny(threshold, threshold1=self.canny_threshold1, threshold2=self.canny_threshold2)
 
             final = np.copy(gray)
 
-            pupil = cv2.HoughCircles(edge, cv2.HOUGH_GRADIENT, dp=self.hough_dp, minDist=self.hough_minDist,
+            pupil = cv2.HoughCircles(threshold, cv2.HOUGH_GRADIENT, dp=self.hough_dp, minDist=self.hough_minDist,
                                      param1=self.hough_param1, param2=self.hough_param2,
                                      minRadius=self.hough_minRadius, maxRadius=self.hough_maxRadius)
 
-            if pupil is not None:
-                pupil = np.uint16(np.around(pupil))
+            contours = cv2.findContours(threshold, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)[1]
+            contours = sorted(contours, key=lambda x: cv2.contourArea(x), reverse=True)
 
-                for i in pupil[0, :]:
-                    cv2.circle(final, (i[0], i[1]), i[2], (255, 255, 0), 1)
+            if len(contours) > 0:
+                (x, y, w, h) = cv2.boundingRect(contours[0])
+                cv2.circle(final, (x + int(w / 2), y + int(h / 2)), int(h / 3), (255, 255, 255), 3)
+                cv2.line(final, (x + int(w / 2), 0), (x + int(w / 2), rows), (0, 255, 0), 2)
+                cv2.line(final, (0, y + int(h / 2)), (cols, y + int(h / 2)), (0, 255, 0), 2)
 
-            img_final1 = cv2.hconcat([self.resize(gray), self.resize(whitening), self.resize(gaussian)])
-            img_final2 = cv2.hconcat([self.resize(median), self.resize(threshold), self.resize(final)])
+            img_final1 = cv2.hconcat([self.resize(gray), self.resize(gaussian), self.resize(median)])
+            img_final2 = cv2.hconcat([self.resize(gray), self.resize(threshold), self.resize(final)])
             img_final = cv2.vconcat([img_final1, img_final2])
 
             cv2.namedWindow('Training', cv2.WINDOW_NORMAL)
