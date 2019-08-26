@@ -33,11 +33,13 @@ class Main:
             ret, frame = exam.read()
 
             gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+            whitening = np.array(255 * (gray / 255) ** self.whitening, dtype='uint8')
+            gaussian = cv2.GaussianBlur(whitening, (9, 9), 0)
+            median = cv2.medianBlur(gaussian, 3)
+            threshold = cv2.threshold(median, 25, 255, cv2.THRESH_BINARY_INV)[1]
+            edge = cv2.Canny(threshold, threshold1=self.canny_threshold1, threshold2=self.canny_threshold2)
+
             final = np.copy(gray)
-
-            whitening = np.array(255 * (final / 255) ** self.whitening, dtype='uint8')
-
-            edge = cv2.Canny(whitening, threshold1=self.canny_threshold1, threshold2=self.canny_threshold2)
 
             pupil = cv2.HoughCircles(edge, cv2.HOUGH_GRADIENT, dp=self.hough_dp, minDist=self.hough_minDist,
                                      param1=self.hough_param1, param2=self.hough_param2,
@@ -49,8 +51,8 @@ class Main:
                 for i in pupil[0, :]:
                     cv2.circle(final, (i[0], i[1]), i[2], (255, 255, 0), 1)
 
-            img_final1 = cv2.hconcat([self.resize(gray), self.resize(whitening)])
-            img_final2 = cv2.hconcat([self.resize(edge), self.resize(final)])
+            img_final1 = cv2.hconcat([self.resize(gray), self.resize(whitening), self.resize(gaussian)])
+            img_final2 = cv2.hconcat([self.resize(median), self.resize(threshold), self.resize(final)])
             img_final = cv2.vconcat([img_final1, img_final2])
 
             cv2.namedWindow('Training', cv2.WINDOW_NORMAL)
