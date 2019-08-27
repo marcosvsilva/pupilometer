@@ -34,11 +34,9 @@ class Main:
             rows, cols, _ = frame.shape
 
             gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
-            #whitening = np.array(255 * (gray / 255) ** self.whitening, dtype='uint8')
             gaussian = cv2.GaussianBlur(gray, (9, 9), 0)
             median = cv2.medianBlur(gaussian, 3)
             threshold = cv2.threshold(median, 25, 255, cv2.THRESH_BINARY_INV)[1]
-            #edge = cv2.Canny(threshold, threshold1=self.canny_threshold1, threshold2=self.canny_threshold2)
 
             final = np.copy(gray)
 
