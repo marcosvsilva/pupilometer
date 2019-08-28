@@ -26,6 +26,9 @@ class Main:
         self.crop_height = 50
         self.crop_width = 50
 
+        self.best_area_height = (100, 200)
+        self.best_area_width = (100, 200)
+
         self.limiar = 150
 
     def start_process(self):
@@ -47,46 +50,46 @@ class Main:
             contours = cv2.findContours(threshold, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)[1]
             contours = sorted(contours, key=lambda x: cv2.contourArea(x), reverse=True)
 
-            if len(contours) > 0:
-                (x, y, w, h) = cv2.boundingRect(contours[0])
-                cv2.imshow('', threshold)
-                center = (x + int(w / 2), y + int(h / 2))
-                radius = self.calculate_radius(image=threshold, center=center)
-                if radius < 1:
-                    radius = 10
+            center, radius = self.best_center(image=threshold, contours=contours)
 
-                cv2.circle(final, center, radius, (255, 255, 255), 3)
-                cv2.line(final, (x + int(w / 2), 0), (x + int(w / 2), rows), (0, 255, 0), 2)
-                cv2.line(final, (0, y + int(h / 2)), (cols, y + int(h / 2)), (0, 255, 0), 2)
+            if center is not None:
+                cv2.circle(final, center, radius, (255, 255, 0), 3)
 
-            img_final1 = cv2.hconcat([self.resize(gray), self.resize(gaussian), self.resize(median)])
-            img_final2 = cv2.hconcat([self.resize(gray), self.resize(threshold), self.resize(final)])
-            img_final = cv2.vconcat([img_final1, img_final2])
+                img_final1 = cv2.hconcat([self.resize(gray), self.resize(gaussian), self.resize(median)])
+                img_final2 = cv2.hconcat([self.resize(gray), self.resize(threshold), self.resize(final)])
+                img_final = cv2.vconcat([img_final1, img_final2])
 
-            cv2.namedWindow('Training', cv2.WINDOW_NORMAL)
-            cv2.imshow('Training', img_final)
+                cv2.namedWindow('Training', cv2.WINDOW_NORMAL)
+                cv2.imshow('Training', img_final)
 
-            if cv2.waitKey(1) & 0xFF == ord('p'):  # Pause
-                time.sleep(3)
+                if cv2.waitKey(1) & 0xFF == ord('p'):  # Pause
+                    time.sleep(3)
 
         exam.release()
         cv2.destroyAllWindows
 
-    def crop_area(self, image, area):
-        pass
+    def best_center(self, image, contours):
+        center = None
+        radius = 0
+        for contour in contours:
+            (x, y, w, h) = cv2.boundingRect(contour)
+            center = (x + int(w / 2), y + int(h / 2))
+            if center[0] in range(self.best_area_height[1])[slice(*self.best_area_height)] and \
+                    center[1] in range(self.best_area_width[1])[slice(*self.best_area_width)]:
+                radius = self.calculate_radius(image=image, center=center)
+                if radius > 0:
+                    break
+        return center, radius
 
     def calculate_radius(self, image, center):
+        lin, col = image.shape
         x, y = center
-        w, z = image.shape
         radius = 0
-        if (x < w) and (y < z):
-            init = int(image[x][y])
-            for i in range(z-y):
-                #if y+i < z:
-                aux = image[x][y+i]
-                if abs(aux-init) > self.limiar:
-                    radius = i
-                    break
+        init = int(image[x][y])
+        for i in range(col-y):
+            if abs(int(image[x][y+i])-init) > self.limiar:
+                radius = i
+                break
         return radius
 
 
