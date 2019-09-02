@@ -12,24 +12,23 @@ class Main:
         # Parameter Definition
         self.whitening = 0.2
 
-        self.canny_threshold1 = 10
-        self.canny_threshold2 = 40
+        self.size_filter_gaussian = (9, 9)
+        self.type_gaussian = 0
 
-        self.hough_dp = 30
-        self.hough_minDist = 40
-        self.hough_param1 = 100
-        self.hough_param2 = 100
+        self.size_median = 3
+        self.thresh_threshold = 25
+        self.maxvalue_threshold = 255
 
-        self.hough_minRadius = 10
-        self.hough_maxRadius = 100
+        self.color_circle = (255, 255, 0)
+        self.thickness_circle = 3
 
-        self.crop_height = 50
-        self.crop_width = 50
+        self.best_area_height = (50, 300)
+        self.best_area_width = (50, 300)
+        self.radius_size = (50, 100)
 
-        self.best_area_height = (100, 200)
-        self.best_area_width = (100, 200)
+        self.sleep_pause = 3
 
-        self.limiar = 150
+        self.threshold = 150
 
     def start_process(self):
         for exam in self.exams:
@@ -42,9 +41,9 @@ class Main:
             rows, cols, _ = frame.shape
 
             gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
-            gaussian = cv2.GaussianBlur(gray, (9, 9), 0)
-            median = cv2.medianBlur(gaussian, 3)
-            threshold = cv2.threshold(median, 25, 255, cv2.THRESH_BINARY_INV)[1]
+            gaussian = cv2.GaussianBlur(gray, self.size_filter_gaussian, self.type_gaussian)
+            median = cv2.medianBlur(gaussian, self.size_median)
+            threshold = cv2.threshold(median, self.thresh_threshold, self.maxvalue_threshold, cv2.THRESH_BINARY_INV)[1]
             final = np.copy(gray)
 
             contours = cv2.findContours(threshold, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)[1]
@@ -53,7 +52,7 @@ class Main:
             center, radius = self.best_center(image=threshold, contours=contours)
 
             if center is not None:
-                cv2.circle(final, center, radius, (255, 255, 0), 3)
+                cv2.circle(final, center, radius, self.color_circle, self.thickness_circle)
 
                 img_final1 = cv2.hconcat([self.resize(gray), self.resize(gaussian), self.resize(median)])
                 img_final2 = cv2.hconcat([self.resize(gray), self.resize(threshold), self.resize(final)])
@@ -63,7 +62,7 @@ class Main:
                 cv2.imshow('Training', img_final)
 
                 if cv2.waitKey(1) & 0xFF == ord('p'):  # Pause
-                    time.sleep(3)
+                    time.sleep(self.sleep_pause)
 
         exam.release()
         cv2.destroyAllWindows
@@ -74,10 +73,10 @@ class Main:
         for contour in contours:
             (x, y, w, h) = cv2.boundingRect(contour)
             center = (x + int(w / 2), y + int(h / 2))
-            if center[0] in range(self.best_area_height[1])[slice(*self.best_area_height)] and \
-                    center[1] in range(self.best_area_width[1])[slice(*self.best_area_width)]:
+            lin, col = image.shape
+            if center[0] < lin and center[1] < col:
                 radius = self.calculate_radius(image=image, center=center)
-                if radius > 0:
+                if radius in range(self.radius_size[1])[slice(*self.radius_size)]:
                     break
         return center, radius
 
@@ -87,7 +86,7 @@ class Main:
         radius = 0
         init = int(image[x][y])
         for i in range(col-y):
-            if abs(int(image[x][y+i])-init) > self.limiar:
+            if abs(int(image[x][y+i])-init) > self.threshold:
                 radius = i
                 break
         return radius
