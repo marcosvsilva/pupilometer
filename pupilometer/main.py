@@ -3,6 +3,16 @@ import cv2
 import os
 import time
 
+directions_radius = ('east', 'west', 'north', 'south', 'northeast', 'northwest', 'southeast', 'south-west')
+
+
+def inc(numbers):
+    return [x + 1 for x in numbers]
+
+
+def dec(numbers):
+    return [x - 1 for x in numbers]
+
 
 class Main:
     def __init__(self):
@@ -28,7 +38,9 @@ class Main:
 
         self.sleep_pause = 3
 
-        self.threshold = 150
+        self.edge_threshold = 150
+
+        self.radius_validate_threshold = 5
 
     def start_process(self):
         for exam in self.exams:
@@ -69,29 +81,63 @@ class Main:
 
     def best_center(self, image, contours):
         center = None
-        radius = 0
+        rad = 0
         for contour in contours:
             (x, y, w, h) = cv2.boundingRect(contour)
             center = (x + int(w / 2), y + int(h / 2))
             lin, col = image.shape
             if center[0] < lin and center[1] < col:
-                radius = self.calculate_radius(image=image, center=center)
-                if radius in range(self.radius_size[1])[slice(*self.radius_size)]:
-                    break
-        return center, radius
+                radius = []
+                for direction in directions_radius:
+                    radius.append(self.calculate_radius(image=image, center=center, direction=direction))
 
-    def calculate_radius(self, image, center):
+                if self.validate_radius(radius):
+                    rad = np.array(radius).mean()
+                    break
+        return center, rad
+
+    def validate_radius(self, radius):
+        validate = 0
+        for rad in radius:
+            if rad in range(self.radius_size[1])[slice(*self.radius_size)]:
+                validate += 1
+        return validate >= self.radius_validate_threshold
+
+    def calculate_radius(self, image, center, direction):
         lin, col = image.shape
         x, y = center
-        radius = 0
+        radius = calc_radius = 0
         init = int(image[x][y])
-        for i in range(col-y):
-            if abs(int(image[x][y+i])-init) > self.threshold:
-                radius = i
+        while (0 < x < lin) or (0 < y < col) or ():
+            if direction == 'east':
+                y += 1
+            elif direction == 'west':
+                y -= 1
+            elif direction == 'north':
+                x += 1
+            elif direction == 'south':
+                x -= 1
+            elif direction == 'northeast':
+                x += 1
+                y += 1
+            elif direction == 'northwest':
+                x += 1
+                y -= 1
+            elif direction == 'southeast':
+                x -= 1
+                y += 1
+            elif direction == 'south-west':
+                x -= 1
+                y -= 1
+            else:
                 break
+
+            calc_radius += 1
+            if abs(int(image[x][y]) - init) > self.edge_threshold:
+                radius = calc_radius
+                break
+
         return radius
-
-
 
     @staticmethod
     def resize(figure):
