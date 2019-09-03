@@ -16,31 +16,31 @@ def dec(numbers):
 
 class Main:
     def __init__(self):
+        # Paths parameters
         self.dataset_path = os.getcwd() + "/dataset"
         self.exams = os.listdir(self.dataset_path)
 
-        # Parameter Definition
+        # Filters parameters
         self.whitening = 0.2
-
         self.size_filter_gaussian = (9, 9)
         self.type_gaussian = 0
-
         self.size_median = 3
         self.thresh_threshold = 25
         self.maxvalue_threshold = 255
 
-        self.color_circle = (255, 255, 0)
-        self.thickness_circle = 3
-
+        # Selection best ellipse parameters
         self.best_area_height = (50, 300)
         self.best_area_width = (50, 300)
         self.radius_size = (50, 100)
-
-        self.sleep_pause = 3
-
         self.edge_threshold = 150
+        self.radius_validate_threshold = 3
 
-        self.radius_validate_threshold = 5
+        # Circle draw parameters
+        self.color_circle = (255, 255, 0)
+        self.thickness_circle = 3
+
+        # Others parameters
+        self.sleep_pause = 3
 
     def start_process(self):
         for exam in self.exams:
@@ -92,7 +92,7 @@ class Main:
                     radius.append(self.calculate_radius(image=image, center=center, direction=direction))
 
                 if self.validate_radius(radius):
-                    rad = np.array(radius).mean()
+                    rad = int(radius[1])
                     break
         return center, rad
 
@@ -108,7 +108,7 @@ class Main:
         x, y = center
         radius = calc_radius = 0
         init = int(image[x][y])
-        while (0 < x < lin) or (0 < y < col) or ():
+        while (1 < x < lin-1) and (1 < y < col-1):
             if direction == 'east':
                 y += 1
             elif direction == 'west':
