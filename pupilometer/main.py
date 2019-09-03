@@ -18,6 +18,8 @@ class Main:
     def __init__(self):
         # Paths parameters
         self.dataset_path = os.getcwd() + "/dataset"
+        self.output_path = os.getcwd() + "/identified"
+        self.name_image_identified = "frame_"
         self.exams = os.listdir(self.dataset_path)
 
         # Filters parameters
@@ -40,6 +42,7 @@ class Main:
         self.thickness_circle = 3
 
         # Others parameters
+        self.save_output = True
         self.sleep_pause = 3
 
     def start_process(self):
@@ -48,9 +51,11 @@ class Main:
             self.pupillary_analysis(video)
 
     def pupillary_analysis(self, exam):
+        number_frame = 0
         while exam.isOpened():
             ret, frame = exam.read()
             rows, cols, _ = frame.shape
+            number_frame += 1
 
             gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
             gaussian = cv2.GaussianBlur(gray, self.size_filter_gaussian, self.type_gaussian)
@@ -72,7 +77,10 @@ class Main:
 
                 cv2.namedWindow('Training', cv2.WINDOW_NORMAL)
                 cv2.imshow('Training', img_final)
-                cv2.sav
+
+                if self.save_output:
+                    name_image = "%s/%s_%03d.png" % (self.output_path, self.name_image_identified, number_frame)
+                    cv2.imwrite(name_image, img_final)
 
                 if cv2.waitKey(1) & 0xFF == ord('p'):  # Pause
                     time.sleep(self.sleep_pause)
