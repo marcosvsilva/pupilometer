@@ -8,6 +8,9 @@
 # Dataset
 dataset/
 
+# Outputs
+identified/
+
 # Mac Files
 *.DS_Store
 
