@@ -31,9 +31,9 @@ class Main:
         # Selection best ellipse parameters
         self.best_area_height = (50, 300)
         self.best_area_width = (50, 300)
-        self.radius_size = (50, 100)
+        self.radius_size = (35, 65)
         self.edge_threshold = 150
-        self.radius_validate_threshold = 3
+        self.radius_validate_threshold = 5
 
         # Circle draw parameters
         self.color_circle = (255, 255, 0)
@@ -63,7 +63,7 @@ class Main:
 
             center, radius = self.best_center(image=threshold, contours=contours)
 
-            if center is not None:
+            if center is not None and radius > 0:
                 cv2.circle(final, center, radius, self.color_circle, self.thickness_circle)
 
                 img_final1 = cv2.hconcat([self.resize(gray), self.resize(gaussian), self.resize(median)])
@@ -72,6 +72,7 @@ class Main:
 
                 cv2.namedWindow('Training', cv2.WINDOW_NORMAL)
                 cv2.imshow('Training', img_final)
+                cv2.sav
 
                 if cv2.waitKey(1) & 0xFF == ord('p'):  # Pause
                     time.sleep(self.sleep_pause)
@@ -92,7 +93,7 @@ class Main:
                     radius.append(self.calculate_radius(image=image, center=center, direction=direction))
 
                 if self.validate_radius(radius):
-                    rad = int(radius[1])
+                    rad = int(np.array(radius).mean())
                     break
         return center, rad
 
