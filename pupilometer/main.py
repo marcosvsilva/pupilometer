@@ -101,7 +101,7 @@ class Main:
                     radius.append(self.calculate_radius(image=image, center=center, direction=direction))
 
                 if self.validate_radius(radius):
-                    rad = int(np.array(radius).mean())
+                    rad = int(np.array(radius).max())
                     break
         return center, rad
 
