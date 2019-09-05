@@ -33,7 +33,7 @@ class Main:
         # Selection best ellipse parameters
         self.best_area_height = (50, 300)
         self.best_area_width = (50, 300)
-        self.radius_size = (35, 65)
+        self.radius_size = (40, 65)
         self.edge_threshold = 150
         self.radius_validate_threshold = 5
 
@@ -56,6 +56,10 @@ class Main:
             ret, frame = exam.read()
             rows, cols, _ = frame.shape
             number_frame += 1
+
+            name_image = "%s_%03d.png" % (self.name_image_identified, number_frame)
+            if name_image == 'frame_421':
+                print("pause")
 
             gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
             gaussian = cv2.GaussianBlur(gray, self.size_filter_gaussian, self.type_gaussian)
