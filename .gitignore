@@ -10,6 +10,7 @@ dataset/
 
 # Outputs
 identified/
+threshold/
 
 # Mac Files
 *.DS_Store
