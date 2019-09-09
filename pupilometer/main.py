@@ -11,7 +11,7 @@ class Main:
         # Paths parameters
         self.dataset_path = os.getcwd() + "/dataset"
         self.output_path = os.getcwd() + "/identified"
-        self.name_image_identified = "frame_"
+        self.name_image_identified = "frame"
         self.exams = os.listdir(self.dataset_path)
 
         # Filters parameters
@@ -26,7 +26,7 @@ class Main:
         self.best_area_height = (50, 300)
         self.best_area_width = (50, 300)
         self.radius_size = (40, 65)
-        self.edge_threshold = 150
+        self.edge_threshold = 180
         self.radius_validate_threshold = 5
 
         # Circle draw parameters
@@ -50,7 +50,7 @@ class Main:
             number_frame += 1
 
             name_image = "%s_%03d.png" % (self.name_image_identified, number_frame)
-            if name_image == 'frame_421':
+            if name_image == 'frame_023.png':
                 print("pause")
 
             gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
@@ -67,19 +67,19 @@ class Main:
             if center is not None and radius > 0:
                 cv2.circle(final, center, radius, self.color_circle, self.thickness_circle)
 
-                img_final1 = cv2.hconcat([self.resize(gray), self.resize(gaussian), self.resize(median)])
-                img_final2 = cv2.hconcat([self.resize(gray), self.resize(threshold), self.resize(final)])
-                img_final = cv2.vconcat([img_final1, img_final2])
+            img_final1 = cv2.hconcat([self.resize(gray), self.resize(gaussian), self.resize(median)])
+            img_final2 = cv2.hconcat([self.resize(gray), self.resize(threshold), self.resize(final)])
+            img_final = cv2.vconcat([img_final1, img_final2])
 
-                cv2.namedWindow('Training', cv2.WINDOW_NORMAL)
-                cv2.imshow('Training', img_final)
+            cv2.namedWindow('Training', cv2.WINDOW_NORMAL)
+            cv2.imshow('Training', img_final)
 
-                if self.save_output:
-                    name_image = "%s/%s_%03d.png" % (self.output_path, self.name_image_identified, number_frame)
-                    cv2.imwrite(name_image, img_final)
+            if self.save_output:
+                name_image = "%s/%s_%03d.png" % (self.output_path, self.name_image_identified, number_frame)
+                cv2.imwrite(name_image, img_final)
 
-                if cv2.waitKey(1) & 0xFF == ord('p'):  # Pause
-                    time.sleep(self.sleep_pause)
+            if cv2.waitKey(1) & 0xFF == ord('p'):  # Pause
+                time.sleep(self.sleep_pause)
 
         exam.release()
         cv2.destroyAllWindows
