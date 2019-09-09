@@ -3,7 +3,7 @@ import cv2
 import os
 import time
 
-directions_radius = ('east', 'west', 'north', 'south', 'northeast', 'northwest', 'southeast', 'south-west')
+semicircle_positions = ('northeast', 'southwest', 'east', 'south', 'southeast')
 
 
 class Main:
@@ -11,7 +11,9 @@ class Main:
         # Paths parameters
         self.dataset_path = os.getcwd() + "/dataset"
         self.output_path = os.getcwd() + "/identified"
+        self.output_threshold_path = os.getcwd() + "/threshold"
         self.name_image_identified = "frame"
+        self.name_threshold_identified = "threshold"
         self.exams = os.listdir(self.dataset_path)
 
         # Filters parameters
@@ -35,6 +37,7 @@ class Main:
 
         # Others parameters
         self.save_output = True
+        self.save_threshold_output = True
         self.sleep_pause = 3
 
     def start_process(self):
@@ -75,8 +78,13 @@ class Main:
             cv2.imshow('Training', img_final)
 
             if self.save_output:
-                name_image = "%s/%s_%03d.png" % (self.output_path, self.name_image_identified, number_frame)
-                cv2.imwrite(name_image, img_final)
+                output = "%s/%s_%03d.png" % (self.output_path, self.name_image_identified, number_frame)
+                cv2.imwrite(output, img_final)
+
+            if self.save_threshold_output:
+                output_threshold = "%s/%s_%03d.png" % (self.output_threshold_path, self.name_threshold_identified,
+                                                       number_frame)
+                cv2.imwrite(output_threshold, img_final)
 
             if cv2.waitKey(1) & 0xFF == ord('p'):  # Pause
                 time.sleep(self.sleep_pause)
@@ -93,7 +101,7 @@ class Main:
             lin, col = image.shape
             if center[0] < lin and center[1] < col:
                 radius = []
-                for direction in directions_radius:
+                for direction in semicircle_positions:
                     radius.append(self.calculate_radius(image=image, center=center, direction=direction))
 
                 if self.validate_radius(radius):
@@ -113,29 +121,21 @@ class Main:
         x, y = center
         radius = calc_radius = 0
         init = int(image[x][y])
+
         while (1 < x < lin-1) and (1 < y < col-1):
             if direction == 'east':
                 y += 1
-            elif direction == 'west':
-                y -= 1
-            elif direction == 'north':
-                x += 1
             elif direction == 'south':
                 x -= 1
             elif direction == 'northeast':
                 x += 1
                 y += 1
-            elif direction == 'northwest':
-                x += 1
-                y -= 1
             elif direction == 'southeast':
                 x -= 1
                 y += 1
-            elif direction == 'south-west':
+            elif direction == 'southwest':
                 x -= 1
                 y -= 1
-            else:
-                break
 
             calc_radius += 1
             if abs(int(image[x][y]) - init) > self.edge_threshold:
