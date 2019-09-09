@@ -6,14 +6,6 @@ import time
 directions_radius = ('east', 'west', 'north', 'south', 'northeast', 'northwest', 'southeast', 'south-west')
 
 
-def inc(numbers):
-    return [x + 1 for x in numbers]
-
-
-def dec(numbers):
-    return [x - 1 for x in numbers]
-
-
 class Main:
     def __init__(self):
         # Paths parameters
