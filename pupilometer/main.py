@@ -11,9 +11,9 @@ class Main:
         # Paths parameters
         self.dataset_path = os.getcwd() + "/dataset"
         self.output_path = os.getcwd() + "/identified"
-        self.output_threshold_path = os.getcwd() + "/threshold"
-        self.name_image_identified = "frame"
-        self.name_threshold_identified = "threshold"
+        self.threshold_path = os.getcwd() + "/threshold"
+        self.name_output = "frame"
+        self.threshold_output = "threshold"
         self.exams = os.listdir(self.dataset_path)
 
         # Filters parameters
@@ -52,7 +52,7 @@ class Main:
             rows, cols, _ = frame.shape
             number_frame += 1
 
-            name_image = "%s_%03d.png" % (self.name_image_identified, number_frame)
+            name_image = "%s_%03d.png" % (self.name_output, number_frame)
             if name_image == 'frame_023.png':
                 print("pause")
 
@@ -78,13 +78,12 @@ class Main:
             cv2.imshow('Training', img_final)
 
             if self.save_output:
-                output = "%s/%s_%03d.png" % (self.output_path, self.name_image_identified, number_frame)
-                cv2.imwrite(output, img_final)
+                name_output = "%s/%s_%03d.png" % (self.output_path, self.name_output, number_frame)
+                cv2.imwrite(name_output, img_final)
 
             if self.save_threshold_output:
-                output_threshold = "%s/%s_%03d.png" % (self.output_threshold_path, self.name_threshold_identified,
-                                                       number_frame)
-                cv2.imwrite(output_threshold, img_final)
+                threshold_output = "%s/%s_%03d.png" % (self.threshold_path, self.threshold_output, number_frame)
+                cv2.imwrite(threshold_output, threshold)
 
             if cv2.waitKey(1) & 0xFF == ord('p'):  # Pause
                 time.sleep(self.sleep_pause)
