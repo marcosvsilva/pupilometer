@@ -78,10 +78,10 @@ class Main:
             contours = cv2.findContours(dilate_two, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)[1]
             contours = sorted(contours, key=lambda x: cv2.contourArea(x), reverse=True)
 
-            img_center, center, radius = self.best_center(image=dilate_two, contours=contours)
+            final, center, radius = self.best_center(image=dilate_two, contours=contours)
 
-            if center is not None and radius > 0:
-                cv2.circle(final, center, radius, self.color_circle, self.thickness_circle)
+            # if center is not None and radius > 0:
+            #     cv2.circle(final, center, radius, self.color_circle, self.thickness_circle)
 
             img_final1 = cv2.hconcat([self.resize(gray), self.resize(gaussian), self.resize(median)])
             img_final2 = cv2.hconcat([self.resize(erode_one), self.resize(dilate_one), self.resize(threshold_one)])
@@ -118,12 +118,13 @@ class Main:
 
                 radius = []
                 for direction in semicircle_positions:
-                    new_image, radio = self.calculate_radius(image=new_image, center=center, direction=direction)
+                    radio = self.calculate_radius(image=new_image, center=center, direction=direction)
                     radius.append(radio)
 
                 if self.validate_radius(radius):
                     rad = int(np.array(radius).max())
                     break
+
         return new_image, center, rad
 
     def validate_radius(self, radius):
@@ -134,7 +135,6 @@ class Main:
         return validate >= self.radius_validate_threshold
 
     def calculate_radius(self, image, center, direction):
-        new_image = np.copy(image)
         lin, col = image.shape
         x, y = center
         radius = calc_radius = 0
@@ -150,14 +150,12 @@ class Main:
             elif direction == 'south':
                 y += 1
 
-            cv2.circle(new_image, (x, y), 3, (0, 0, 0), self.thickness_circle)
-
             calc_radius += 1
             if abs(int(image[x][y]) - init) > self.edge_threshold:
                 radius = calc_radius
                 break
 
-        return new_image, radius
+        return radius
 
     @staticmethod
     def resize(figure):
