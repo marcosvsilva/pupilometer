@@ -61,23 +61,24 @@ class Main:
             gaussian = cv2.GaussianBlur(gray, self.size_filter_gaussian, self.type_gaussian)
             median = cv2.medianBlur(gaussian, self.size_median)
 
-            kernel = np.ones((5, 5), np.uint8)
-            erode_one = cv2.erode(median, kernel=kernel, iterations=1)
-            dilate_one = cv2.dilate(erode_one, kernel=kernel, iterations=1)
+            kernel_one = np.ones((5, 5), np.uint8)
+            erode_one = cv2.erode(median, kernel=kernel_one, iterations=1)
+            dilate_one = cv2.dilate(erode_one, kernel=kernel_one, iterations=1)
             threshold_one = cv2.threshold(dilate_one, self.thresh_threshold,
                                           self.maxvalue_threshold, cv2.THRESH_BINARY_INV)[1]
 
-            erode_two = cv2.erode(threshold_one, kernel=kernel, iterations=1)
-            dilate_two = cv2.dilate(erode_two, kernel=kernel, iterations=1)
+            kernel_two = np.ones((7, 7), np.uint8)
+            erode_two = cv2.erode(threshold_one, kernel=kernel_two, iterations=1)
+            dilate_two = cv2.dilate(erode_two, kernel=kernel_two, iterations=1)
             threshold_two = cv2.threshold(dilate_two, self.thresh_threshold,
                                           self.maxvalue_threshold, cv2.THRESH_BINARY_INV)[1]
 
             final = np.copy(gray)
 
-            contours = cv2.findContours(threshold_two, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)[1]
+            contours = cv2.findContours(dilate_two, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)[1]
             contours = sorted(contours, key=lambda x: cv2.contourArea(x), reverse=True)
 
-            img_center, center, radius = self.best_center(image=threshold_two, contours=contours)
+            img_center, center, radius = self.best_center(image=dilate_two, contours=contours)
 
             if center is not None and radius > 0:
                 cv2.circle(final, center, radius, self.color_circle, self.thickness_circle)
