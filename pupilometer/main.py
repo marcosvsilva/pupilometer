@@ -84,9 +84,8 @@ class Main:
             #     cv2.circle(final, center, radius, self.color_circle, self.thickness_circle)
 
             img_final1 = cv2.hconcat([self.resize(gray), self.resize(gaussian), self.resize(median)])
-            img_final2 = cv2.hconcat([self.resize(erode_one), self.resize(dilate_one), self.resize(threshold_one)])
-            img_final3 = cv2.hconcat([self.resize(erode_two), self.resize(dilate_two), self.resize(final)])
-            img_final = cv2.vconcat([img_final1, img_final2, img_final3])
+            img_final2 = cv2.hconcat([self.resize(threshold_one), self.resize(threshold_two), self.resize(final)])
+            img_final = cv2.vconcat([img_final1, img_final2])
 
             cv2.namedWindow('Training', cv2.WINDOW_NORMAL)
             cv2.imshow('Training', img_final)
