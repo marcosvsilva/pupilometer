@@ -11,9 +11,7 @@ class Main:
         # Paths parameters
         self.dataset_path = os.getcwd() + "/dataset"
         self.output_path = os.getcwd() + "/identified"
-        self.threshold_path = os.getcwd() + "/threshold"
         self.name_output = "frame"
-        self.threshold_output = "threshold"
         self.exams = os.listdir(self.dataset_path)
 
         # Filters parameters
@@ -25,10 +23,7 @@ class Main:
         self.maxvalue_threshold = 255
 
         # Selection best ellipse parameters
-        self.best_area_height = (50, 300)
-        self.best_area_width = (50, 300)
-        self.radius_size = (30, 80)
-        self.edge_threshold = 200
+        self.radius_size = (30, 90)
         self.radius_validate_threshold = 3
 
         # Circle draw parameters
@@ -36,25 +31,25 @@ class Main:
         self.thickness_circle = 3
 
         # Others parameters
-        self.save_output = True
-        self.save_threshold_output = False
+        self.save_output = False
         self.sleep_pause = 3
 
     def start_process(self):
         for exam in self.exams:
+            print("start")
             video = cv2.VideoCapture("{}/{}".format(self.dataset_path, exam))
             self.pupillary_analysis(video)
 
     def pupillary_analysis(self, exam):
         number_frame = 0
-        while exam.isOpened():
+        while True:
             ret, frame = exam.read()
+
+            if frame is None:
+                break
+
             rows, cols, _ = frame.shape
             number_frame += 1
-
-            name_image = "%s_%03d.png" % (self.name_output, number_frame)
-            if name_image == 'frame_031.png':
-                print("pause")
 
             gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
             gaussian = cv2.GaussianBlur(gray, self.size_filter_gaussian, self.type_gaussian)
@@ -81,20 +76,18 @@ class Main:
             if center is not None and radius > 0:
                 cv2.circle(final, center, radius, self.color_circle, self.thickness_circle)
 
-            img_final1 = cv2.hconcat([self.resize(gray), self.resize(gaussian), self.resize(median)])
-            img_final2 = cv2.hconcat([self.resize(threshold_one), self.resize(threshold_two), self.resize(final)])
-            img_final = cv2.vconcat([img_final1, img_final2])
+            # img_final1 = cv2.hconcat([self.resize(gray), self.resize(gaussian), self.resize(median)])
+            # img_final2 = cv2.hconcat([self.resize(threshold_one), self.resize(threshold_two), self.resize(final)])
+            # img_final = cv2.vconcat([img_final1, img_final2])
+
+            img_final = cv2.hconcat([self.resize(gray), self.resize(final)])
 
             cv2.namedWindow('Training', cv2.WINDOW_NORMAL)
             cv2.imshow('Training', img_final)
 
             if self.save_output:
                 name_output = "%s/%s_%03d.png" % (self.output_path, self.name_output, number_frame)
-                cv2.imwrite(name_output, final)
-
-            if self.save_threshold_output:
-                threshold_output = "%s/%s_%03d.png" % (self.threshold_path, self.threshold_output, number_frame)
-                cv2.imwrite(threshold_output, threshold_two)
+                cv2.imwrite(name_output, img_final)
 
             if cv2.waitKey(1) & 0xFF == ord('p'):  # Pause
                 time.sleep(self.sleep_pause)
