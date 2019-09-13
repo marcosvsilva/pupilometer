@@ -76,10 +76,10 @@ class Main:
             contours = cv2.findContours(dilate_two, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)[1]
             contours = sorted(contours, key=lambda x: cv2.contourArea(x), reverse=True)
 
-            final, center, radius = self.best_center(image=threshold_two, contours=contours)
+            center, radius = self.best_center(image=threshold_two, contours=contours)
 
-            # if center is not None and radius > 0:
-            #     cv2.circle(final, center, radius, self.color_circle, self.thickness_circle)
+            if center is not None and radius > 0:
+                cv2.circle(final, center, radius, self.color_circle, self.thickness_circle)
 
             img_final1 = cv2.hconcat([self.resize(gray), self.resize(gaussian), self.resize(median)])
             img_final2 = cv2.hconcat([self.resize(threshold_one), self.resize(threshold_two), self.resize(final)])
@@ -105,27 +105,23 @@ class Main:
     def best_center(self, image, contours):
         center = None
         rad = 0
-        new_image = np.copy(image)
         for contour in contours:
             (x, y, w, h) = cv2.boundingRect(contour)
             center = (x + int(w / 2), y + int(h / 2))
             lin, col = image.shape
             if center[0] < lin and center[1] < col:
-                # cv2.circle(new_image, center, 9, (255, 255, 255), self.thickness_circle)
-
                 radius = []
                 for direction in semicircle_positions:
-                    new_image, radio = self.calculate_radius(image=new_image, center=center, direction=direction)
+                    new_image, radio = self.calculate_radius(image=image, center=center, direction=direction)
                     radius.append(radio)
 
                 if self.validate_radius(radius):
                     rad = int(np.array(radius).max())
                     break
 
-        return new_image, center, rad
+        return center, rad
 
     def calculate_radius(self, image, center, direction):
-        new_image = np.copy(image)
         lin, col = image.shape
         x, y = center
         radius = calc_radius = 0
@@ -145,14 +141,12 @@ class Main:
                 x -= 1
                 y += 1
 
-            new_image = cv2.circle(new_image, (x, y), 0, (100, 100, 0))
-
             calc_radius += 1
             if image[y, x] != init:
                 radius = calc_radius
                 break
 
-        return new_image, radius
+        return radius
 
     def validate_radius(self, radius):
         validate = 0
