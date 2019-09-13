@@ -3,8 +3,7 @@ import cv2
 import os
 import time
 
-# semicircle_positions = ('northeast', 'southwest', 'east', 'south', 'southeast')
-semicircle_positions = ('east', 'west', 'south')
+semicircle_positions = ('east', 'west', 'south', 'southeast', 'southwest')
 
 
 class Main:
@@ -37,7 +36,7 @@ class Main:
         self.thickness_circle = 3
 
         # Others parameters
-        self.save_output = False
+        self.save_output = True
         self.save_threshold_output = False
         self.sleep_pause = 3
 
@@ -54,7 +53,7 @@ class Main:
             number_frame += 1
 
             name_image = "%s_%03d.png" % (self.name_output, number_frame)
-            if name_image == 'frame_023.png':
+            if name_image == 'frame_031.png':
                 print("pause")
 
             gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
@@ -74,11 +73,10 @@ class Main:
                                           self.maxvalue_threshold, cv2.THRESH_BINARY_INV)[1]
 
             final = np.copy(gray)
-
             contours = cv2.findContours(dilate_two, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)[1]
             contours = sorted(contours, key=lambda x: cv2.contourArea(x), reverse=True)
 
-            final, center, radius = self.best_center(image=dilate_two, contours=contours)
+            final, center, radius = self.best_center(image=threshold_two, contours=contours)
 
             # if center is not None and radius > 0:
             #     cv2.circle(final, center, radius, self.color_circle, self.thickness_circle)
@@ -92,7 +90,7 @@ class Main:
 
             if self.save_output:
                 name_output = "%s/%s_%03d.png" % (self.output_path, self.name_output, number_frame)
-                cv2.imwrite(name_output, img_final)
+                cv2.imwrite(name_output, final)
 
             if self.save_threshold_output:
                 threshold_output = "%s/%s_%03d.png" % (self.threshold_path, self.threshold_output, number_frame)
@@ -113,11 +111,11 @@ class Main:
             center = (x + int(w / 2), y + int(h / 2))
             lin, col = image.shape
             if center[0] < lin and center[1] < col:
-                cv2.circle(new_image, center, 9, (0, 0, 0), self.thickness_circle)
+                # cv2.circle(new_image, center, 9, (255, 255, 255), self.thickness_circle)
 
                 radius = []
                 for direction in semicircle_positions:
-                    radio = self.calculate_radius(image=new_image, center=center, direction=direction)
+                    new_image, radio = self.calculate_radius(image=new_image, center=center, direction=direction)
                     radius.append(radio)
 
                 if self.validate_radius(radius):
@@ -126,35 +124,42 @@ class Main:
 
         return new_image, center, rad
 
+    def calculate_radius(self, image, center, direction):
+        new_image = np.copy(image)
+        lin, col = image.shape
+        x, y = center
+        radius = calc_radius = 0
+        init = image[y, x]
+
+        while (1 < x < col-1) and (1 < y < lin-1):
+            if direction == 'east':
+                x += 1
+            elif direction == 'west':
+                x -= 1
+            elif direction == 'south':
+                y += 1
+            elif direction == 'southeast':
+                x += 1
+                y += 1
+            elif direction == 'southwest':
+                x -= 1
+                y += 1
+
+            new_image = cv2.circle(new_image, (x, y), 0, (100, 100, 0))
+
+            calc_radius += 1
+            if image[y, x] != init:
+                radius = calc_radius
+                break
+
+        return new_image, radius
+
     def validate_radius(self, radius):
         validate = 0
         for rad in radius:
             if rad in range(self.radius_size[1])[slice(*self.radius_size)]:
                 validate += 1
         return validate >= self.radius_validate_threshold
-
-    def calculate_radius(self, image, center, direction):
-        lin, col = image.shape
-        x, y = center
-        radius = calc_radius = 0
-        init = int(image[x][y])
-
-        while (1 < x < lin-1) and (1 < y < col-1):
-            if direction == 'east':
-                x += 1
-            elif direction == 'west':
-                x -= 1
-            elif direction == 'north':
-                y -= 1
-            elif direction == 'south':
-                y += 1
-
-            calc_radius += 1
-            if abs(int(image[x][y]) - init) > self.edge_threshold:
-                radius = calc_radius
-                break
-
-        return radius
 
     @staticmethod
     def resize(figure):
