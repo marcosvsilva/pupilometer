@@ -112,7 +112,7 @@ class Main:
             if center[0] < lin and center[1] < col:
                 radius = []
                 for direction in semicircle_positions:
-                    new_image, radio = self.calculate_radius(image=image, center=center, direction=direction)
+                    radio = self.calculate_radius(image=image, center=center, direction=direction)
                     radius.append(radio)
 
                 if self.validate_radius(radius):
