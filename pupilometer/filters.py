@@ -21,7 +21,7 @@ class Filters:
 
         self.ellipse = Ellipse()
 
-    def pupillary_analysis(self, frame):
+    def pupil_analysis(self, frame):
         if frame is None:
             raise Exception("Frame is none!")
 
@@ -43,7 +43,7 @@ class Filters:
         contours = cv2.findContours(dilate_two, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)[1]
         contours = sorted(contours, key=lambda x: cv2.contourArea(x), reverse=True)
 
-        center, radius = self.ellipse.best_center(image=threshold_two, contours=contours)
+        center, radius = self.ellipse.select_best_center(image=threshold_two, contours=contours)
 
         if center is not None and radius > 0:
             cv2.circle(final, center, radius, self.color_circle, self.thickness_circle)

@@ -9,21 +9,24 @@ class Ellipse:
         # Ellipse parameters
         self.radius_size = (30, 90)
         self.radius_validate_threshold = 3
+        self.rotate_semicircle = False
+        self.angle_rotate = 30
 
         self.lin = self.col = 0
 
-    def best_center(self, image, contours):
+    def select_best_center(self, image, contours):
         self.lin, self.col = image.shape
-        center = None
-        rad = 0
+        center = rad = 0
         for contour in contours:
             (x, y, w, h) = cv2.boundingRect(contour)
             center = (x + int(w / 2), y + int(h / 2))
             if center[0] < self.lin and center[1] < self.col:
                 radius = []
-                for direction in semicircle_positions:
-                    radio = self.calculate_radius(image=image, center=center, direction=direction)
-                    radius.append(radio)
+                angles = [x * self.angle_rotate for x in range(int(360 / self.angle_rotate)+1)]
+                for angle in angles:
+                    for direction in semicircle_positions:
+                        radio = self.calculate_radius(image=image, center=center, direction=direction, angle=angle)
+                        radius.append(radio)
 
                 if self.validate_radius(radius):
                     rad = int(np.array(radius).max())
@@ -31,9 +34,9 @@ class Ellipse:
 
         return center, rad
 
-    def calculate_radius(self, image, center, direction):
+    def calculate_radius(self, image, center, direction, angle):
         x, y = center
-        radius = calc_radius = 0
+        radius = 0
         init = image[y, x]
 
         while (1 < x < self.col-1) and (1 < y < self.lin-1):
@@ -50,9 +53,8 @@ class Ellipse:
                 x -= 1
                 y += 1
 
-            calc_radius += 1
             if image[y, x] != init:
-                radius = calc_radius
+                radius = self.calc_radius(center, (x, y))
                 break
 
         return radius
@@ -63,3 +65,10 @@ class Ellipse:
             if rad in range(self.radius_size[1])[slice(*self.radius_size)]:
                 validate += 1
         return validate >= self.radius_validate_threshold
+
+    @staticmethod
+    def calc_radius(center, position):
+        if position[0] > center[0]:
+            return position[0] - center[0]
+        else:
+            return position[1] - center[1]

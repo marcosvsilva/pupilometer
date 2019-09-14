@@ -1,4 +1,3 @@
-import numpy as np
 import cv2
 import os
 import time
@@ -31,7 +30,7 @@ class Main:
             if frame is None:
                 break
 
-            presentation, final = self.filters.pupillary_analysis(frame)
+            presentation, final = self.filters.pupil_analysis(frame)
 
             cv2.namedWindow('Training', cv2.WINDOW_NORMAL)
             cv2.imshow('Training', presentation)
