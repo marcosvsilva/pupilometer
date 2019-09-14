@@ -14,8 +14,7 @@ class Filters:
         self.size_median = 3
         self.thresh_threshold = 25
         self.maxvalue_threshold = 255
-        self.kernel_morphology_one = np.ones((5, 5), np.uint8)
-        self.kernel_morphology_two = np.ones((7, 7), np.uint8)
+        self.kernel_size_morphology = ((5, 5), (7, 7), (10, 10), (12, 12), (15, 15), (17, 17))
         self.color_circle = (255, 255, 0)
         self.thickness_circle = 3
 
@@ -29,28 +28,24 @@ class Filters:
         gaussian = cv2.GaussianBlur(gray, self.size_filter_gaussian, self.type_gaussian)
         median = cv2.medianBlur(gaussian, self.size_median)
 
-        erode_one = cv2.erode(median, kernel=self.kernel_morphology_one, iterations=1)
-        dilate_one = cv2.dilate(erode_one, kernel=self.kernel_morphology_one, iterations=1)
-        threshold_one = cv2.threshold(dilate_one, self.thresh_threshold,
-                                      self.maxvalue_threshold, cv2.THRESH_BINARY_INV)[1]
-
-        erode_two = cv2.erode(threshold_one, kernel=self.kernel_morphology_two, iterations=1)
-        dilate_two = cv2.dilate(erode_two, kernel=self.kernel_morphology_two, iterations=1)
-        threshold_two = cv2.threshold(dilate_two, self.thresh_threshold,
-                                      self.maxvalue_threshold, cv2.THRESH_BINARY_INV)[1]
-
         final = np.copy(gray)
-        contours = cv2.findContours(dilate_two, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)[1]
-        contours = sorted(contours, key=lambda x: cv2.contourArea(x), reverse=True)
+        for size in self.kernel_size_morphology:
+            kernel = np.ones(size, np.uint8)
+            erode = cv2.erode(median, kernel=kernel, iterations=1)
+            dilate = cv2.dilate(erode, kernel=kernel, iterations=1)
+            threshold = cv2.threshold(dilate, self.thresh_threshold, self.maxvalue_threshold, cv2.THRESH_BINARY)[1]
 
-        center, radius = self.ellipse.select_best_center(image=threshold_two, contours=contours)
+            contours = cv2.findContours(threshold, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)[1]
+            contours = sorted(contours, key=lambda x: cv2.contourArea(x), reverse=True)
 
-        if center is not None and radius > 0:
-            cv2.circle(final, center, radius, self.color_circle, self.thickness_circle)
+            center, radius = self.ellipse.select_best_center(image=threshold, contours=contours)
+            if center is not None and radius > 0:
+                cv2.circle(final, center, radius, self.color_circle, self.thickness_circle)
+                break
 
         if self.detail_return:
-            img_final1 = cv2.hconcat([self.resize(gray), self.resize(gaussian), self.resize(median)])
-            img_final2 = cv2.hconcat([self.resize(threshold_one), self.resize(threshold_two), self.resize(final)])
+            img_final1 = cv2.hconcat([self.resize(gray), self.resize(gaussian), self.resize(erode)])
+            img_final2 = cv2.hconcat([self.resize(dilate), self.resize(threshold), self.resize(final)])
             return cv2.vconcat([img_final1, img_final2]), final
         else:
             return cv2.hconcat([self.resize(gray), self.resize(final)]), final

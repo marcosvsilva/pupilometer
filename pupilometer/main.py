@@ -18,9 +18,13 @@ class Main:
         self.filters = Filters(self.detail_presentation)
 
     def start_process(self):
+        exam_jump_process = 0
+        exam_process = 0
         for exam in self.exams:
-            movie = cv2.VideoCapture("{}/{}".format(self.dataset_path, exam))
-            self.pupil_process(movie)
+            if exam_process >= exam_jump_process:
+                movie = cv2.VideoCapture("{}/{}".format(self.dataset_path, exam))
+                self.pupil_process(movie)
+            exam_process += 1
 
     def pupil_process(self, exam):
         number_frame = 0
