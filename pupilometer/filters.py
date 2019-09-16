@@ -1,6 +1,7 @@
 import numpy as np
 import cv2
 from ellipse import Ellipse
+from noise import Noise
 
 
 class Filters:
@@ -17,8 +18,13 @@ class Filters:
         self.kernel_size_morphology = ((5, 5), (7, 7), (10, 10), (12, 12), (15, 15), (17, 17))
         self.color_circle = (255, 255, 0)
         self.thickness_circle = 3
+        self.position_text = (120, 30)
+        self.font_text = cv2.FONT_HERSHEY_DUPLEX
+        self.font_scale = 0.2
+        self.min_area = 30
 
         self.ellipse = Ellipse()
+        self.noise = Noise(self.min_area)
 
     def pupil_analysis(self, frame):
         if frame is None:
@@ -38,17 +44,23 @@ class Filters:
             contours = cv2.findContours(threshold, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)[1]
             contours = sorted(contours, key=lambda x: cv2.contourArea(x), reverse=True)
 
+            threshold = self.noise.remove_noise(frame=threshold, contours=contours)
             center, radius = self.ellipse.select_best_center(image=threshold, contours=contours)
             if center is not None and radius > 0:
                 cv2.circle(final, center, radius, self.color_circle, self.thickness_circle)
                 break
 
+        final = self.write_radius(self.resize(final), radius)
         if self.detail_return:
             img_final1 = cv2.hconcat([self.resize(gray), self.resize(gaussian), self.resize(erode)])
-            img_final2 = cv2.hconcat([self.resize(dilate), self.resize(threshold), self.resize(final)])
+            img_final2 = cv2.hconcat([self.resize(dilate), self.resize(threshold), final])
             return cv2.vconcat([img_final1, img_final2]), final
         else:
-            return cv2.hconcat([self.resize(gray), self.resize(final)]), final
+            return cv2.hconcat([self.resize(gray), final]), final
+
+    def write_radius(self, frame, radius):
+        cv2.putText(frame, "radius: %d" % radius, self.position_text, self.font_text, 1, self.color_circle)
+        return frame
 
     @staticmethod
     def resize(figure):
