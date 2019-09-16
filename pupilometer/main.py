@@ -34,6 +34,9 @@ class Main:
             if frame is None:
                 break
 
+            if number_frame > 200:
+                break
+
             presentation, final = self.filters.pupil_analysis(frame)
 
             cv2.namedWindow('Training', cv2.WINDOW_NORMAL)
@@ -45,6 +48,8 @@ class Main:
 
             if cv2.waitKey(1) & 0xFF == ord('p'):  # Pause
                 time.sleep(self.sleep_pause)
+
+            number_frame += 1
 
         exam.release()
         cv2.destroyAllWindows
