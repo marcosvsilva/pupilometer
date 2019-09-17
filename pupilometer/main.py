@@ -18,7 +18,7 @@ class Main:
         self.filters = Filters(self.detail_presentation)
 
     def start_process(self):
-        exam_jump_process = 0
+        exam_jump_process = 1
         exam_process = 0
         for exam in self.exams:
             if exam_process >= exam_jump_process:
