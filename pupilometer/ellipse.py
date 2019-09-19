@@ -14,6 +14,8 @@ class Ellipse:
         self.min_area_size = 30*30
         self.rotate_semicircle = False
         self.angle_rotate = 30
+        self.black_color = 0
+        self.write_color = 255
 
         self.lin = self.col = 0
         self.image = None
@@ -26,8 +28,9 @@ class Ellipse:
         for contour in contours:
             (x, y, w, h) = cv2.boundingRect(contour)
             center = (x + int(w / 2), y + int(h / 2))
-            if center[0] < self.lin and center[1] < self.col:
-                radius = []
+            radius = []
+
+            if x < self.lin and y < self.col:
                 for direction in circle_directions:
                     radio = self.calculate_radius(center=center, direction=direction)
                     radius.append(radio)
@@ -40,8 +43,8 @@ class Ellipse:
 
     def calculate_radius(self, center, direction):
         x, y = center
-        radius = 0
         init = self.image[y, x]
+        radius = 0
 
         while (1 < x < self.col-2) and (1 < y < self.lin-2):
             x, y = self.calculating_coordinates((x, y), direction)
