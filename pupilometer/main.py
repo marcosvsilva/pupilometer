@@ -11,14 +11,14 @@ class Main:
         self.output_path = os.getcwd() + "/identified"
         self.name_output = "frame"
         self.exams = os.listdir(self.dataset_path)
-        self.detail_presentation = True
+        self.detail_presentation = False
         self.save_output = False
         self.sleep_pause = 3
 
         self.filters = Filters(self.detail_presentation)
 
     def start_process(self):
-        exam_jump_process = 1
+        exam_jump_process = 0
         exam_process = 0
         for exam in self.exams:
             if exam_process >= exam_jump_process:
@@ -35,7 +35,8 @@ class Main:
                 break
 
             if number_frame > 200:
-                break
+                pass
+                # break
 
             presentation, final = self.filters.pupil_analysis(frame)
 
