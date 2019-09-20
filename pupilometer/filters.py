@@ -44,7 +44,7 @@ class Filters:
             contours = cv2.findContours(threshold, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)[1]
             contours = sorted(contours, key=lambda x: cv2.contourArea(x), reverse=True)
 
-            # threshold_clean = self.noise.remove_noise(frame=threshold, contours=contours)
+            threshold_clean = self.noise.remove_noise(frame=threshold, contours=contours)
             center, radius = self.ellipse.select_best_center(image=threshold, contours=contours)
             if center is not None and radius > 0:
                 cv2.circle(final, center, radius, self.color_circle, self.thickness_circle)
