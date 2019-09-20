@@ -41,7 +41,8 @@ class Filters:
             dilate = cv2.dilate(erode, kernel=kernel, iterations=1)
             threshold = cv2.threshold(dilate, self.thresh_threshold, self.maxvalue_threshold, cv2.THRESH_BINARY)[1]
 
-            contours = cv2.findContours(threshold, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)[1]
+            #contours = cv2.findContours(threshold, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)[1]
+            contours, hierachy = cv2.findContours(threshold, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
             contours = sorted(contours, key=lambda x: cv2.contourArea(x), reverse=True)
 
             threshold_clean = self.noise.remove_noise(frame=threshold, contours=contours)

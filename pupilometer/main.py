@@ -7,8 +7,8 @@ from filters import Filters
 class Main:
     def __init__(self):
         # Main parameters
-        self.dataset_path = os.getcwd() + "/dataset"
-        self.output_path = os.getcwd() + "/identified"
+        self.dataset_path = os.getcwd() + "\\pupilometer\\dataset"
+        self.output_path = os.getcwd() + "\\pupilometer\\identified"
         self.name_output = "frame"
         self.exams = os.listdir(self.dataset_path)
         self.detail_presentation = False
