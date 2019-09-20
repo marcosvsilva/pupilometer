@@ -34,10 +34,6 @@ class Main:
             if frame is None:
                 break
 
-            if number_frame > 200:
-                pass
-                # break
-
             presentation, final = self.filters.pupil_analysis(frame)
 
             cv2.namedWindow('Training', cv2.WINDOW_NORMAL)
