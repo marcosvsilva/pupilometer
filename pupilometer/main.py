@@ -7,11 +7,11 @@ from filters import Filters
 class Main:
     def __init__(self):
         # Main parameters
-        self.dataset_path = os.getcwd() + "\\pupilometer\\dataset"
-        self.output_path = os.getcwd() + "\\pupilometer\\identified"
+        self.dataset_path = os.getcwd() + "\dataset"
+        self.output_path = os.getcwd() + "\identified"
         self.name_output = "frame"
         self.exams = os.listdir(self.dataset_path)
-        self.detail_presentation = False
+        self.detail_presentation = True
         self.save_output = False
         self.sleep_pause = 3
 
@@ -29,7 +29,7 @@ class Main:
     def pupil_process(self, exam):
         number_frame = 0
         while True:
-            ret, frame = exam.read()
+            _, frame = exam.read()
 
             if frame is None:
                 break
