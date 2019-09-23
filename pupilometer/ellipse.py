@@ -20,7 +20,7 @@ class Ellipse:
         self.lin = self.col = 0
         self.image = None
 
-    def select_best_center(self, image, contours):
+    def search_ellipse(self, image, contours):
         self.image = image
         self.lin, self.col = image.shape
         center = rad = 0
