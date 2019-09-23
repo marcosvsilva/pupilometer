@@ -42,11 +42,11 @@ class Filters:
             threshold = cv2.threshold(dilate, self.thresh_threshold, self.maxvalue_threshold, cv2.THRESH_BINARY)[1]
 
             #contours = cv2.findContours(threshold, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)[1]
-            contours, hierachy = cv2.findContours(threshold, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
+            contours, _ = cv2.findContours(threshold, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
             contours = sorted(contours, key=lambda x: cv2.contourArea(x), reverse=True)
 
-            threshold_clean = self.noise.remove_noise(frame=threshold, contours=contours)
-            center, radius = self.ellipse.select_best_center(image=threshold, contours=contours)
+            threshold_clean = self.noise.treatment_noise(frame=threshold, contours=contours)
+            center, radius = self.ellipse.search_ellipse(image=threshold, contours=contours)
             if center is not None and radius > 0:
                 cv2.circle(final, center, radius, self.color_circle, self.thickness_circle)
                 break
