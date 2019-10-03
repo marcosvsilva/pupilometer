@@ -45,6 +45,7 @@ class Main:
 
             if cv2.waitKey(1) & 0xFF == ord('p'):  # Pause
                 time.sleep(self.sleep_pause)
+            time.sleep(0.1)
 
             number_frame += 1
 
