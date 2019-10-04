@@ -44,18 +44,22 @@ class Ellipse:
     def calculate_radius(self, center, direction):
         x, y = center
         radius = 0
-        white_verification = self.image[y, x] == self.white_color
+        init = self.image[y, x]
+        # white_verification = self.image[y, x] == self.white_color
 
         while (1 < x < self.col-2) and (1 < y < self.lin-2):
             x, y = self.calculating_coordinates((x, y), direction)
 
-            if white_verification:
-                if self.image[y, x] != self.white_color:
-                    white_verification = False
-            else:
-                if self.image[y, x] != self.black_color:
-                    radius = self.calc_radius(center, (x, y))
-                    break
+            # if white_verification:
+            #     if self.image[y, x] != self.white_color:
+            #         white_verification = False
+            # else:
+            #     if self.image[y, x] != self.black_color:
+            #         radius = self.calc_radius(center, (x, y))
+            #         break
+            if self.image[y, x] != init:
+                radius = self.calc_radius(center, (x, y))
+                break
 
         return radius
 
