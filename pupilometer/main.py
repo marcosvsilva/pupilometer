@@ -12,7 +12,7 @@ class Main:
         self.name_output = "frame"
         self.exams = os.listdir(self.dataset_path)
         self.detail_presentation = True
-        self.save_output = False
+        self.save_output = True
         self.sleep_pause = 3
 
         self.filters = Filters(self.detail_presentation)
@@ -45,7 +45,6 @@ class Main:
 
             if cv2.waitKey(1) & 0xFF == ord('p'):  # Pause
                 time.sleep(self.sleep_pause)
-            time.sleep(0.1)
 
             number_frame += 1
 
