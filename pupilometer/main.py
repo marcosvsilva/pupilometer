@@ -41,7 +41,8 @@ class Main:
 
             if self.save_output:
                 name_output = "%s/%s_%03d.png" % (self.output_path, self.name_output, number_frame)
-                cv2.imwrite(name_output, final)
+                img_save = presentation if self.detail_presentation else final
+                cv2.imwrite(name_output, img_save)
 
             if cv2.waitKey(1) & 0xFF == ord('p'):  # Pause
                 time.sleep(self.sleep_pause)
